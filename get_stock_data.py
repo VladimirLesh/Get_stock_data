@@ -7,7 +7,7 @@ import time
 import os
 
 def get_stock_data():
-    url = 'https://smart-lab.ru/q/shares'
+    url = 'https://finviz.com/screener.ashx'
     response = requests.get(url)
 
     html_string = response.text

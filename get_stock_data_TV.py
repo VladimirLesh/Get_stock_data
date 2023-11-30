@@ -107,6 +107,7 @@ urlFGBL1 = 'https://ru.tradingview.com/symbols/EUREX-FGBL1!/'
 urlRGBI1 = 'https://ru.tradingview.com/symbols/MOEX-RGBI/'
 urlETHUSD = 'https://ru.tradingview.com/symbols/ETHUSD/?exchange=BINANCE'
 urlBTCUSD = 'https://ru.tradingview.com/symbols/BTCUSD/?exchange=BINANCE'
+urlZN1 = 'https://ru.tradingview.com/symbols/CBOT-ZN1!/'
 
 uploadInExcelIndi(urlSP500)
 uploadInExcelIndi(urlHangSeng)
@@ -123,3 +124,4 @@ uploadInExcelIndi(urlFGBL1)
 uploadInExcelIndi(urlRGBI1)
 uploadInExcelIndi(urlETHUSD)
 uploadInExcelIndi(urlBTCUSD)
+uploadInExcelIndi(urlZN1)

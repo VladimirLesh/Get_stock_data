@@ -65,15 +65,12 @@ def check_and_save_file_excel(filename, names_companies, prices, atrs):
     ws = None
 
     if os.path.isfile(filename):
-        # Если файл существует, пытаемся прочитать вкладку "Индексы"
         wb = openpyxl.load_workbook(filename)
         if 'Индексы' in wb.sheetnames:
             ws = wb['Индексы']
         else:
-            # Если вкладка "Индексы" не существует, создаем ее
             ws = wb.create_sheet('Индексы')
     else:
-        # Если файл не существует, создаем новый с вкладкой "Индексы"
         wb = openpyxl.Workbook()
         ws = wb.create_sheet('Индексы')
 
@@ -86,12 +83,9 @@ def check_and_save_file_excel(filename, names_companies, prices, atrs):
         ws[f'A{last_row}'] = name.text.strip()
         ws[f'B{last_row}'] = price.text.strip()
         ws[f'C{last_row}'] = atr.text.strip()
-
-    # Сохраняем изменения
     wb.save(filename)
 
 def check_row(sheet):
-    # Функция проверки последней занятой строки
     last_row_index = sheet.max_row
     return last_row_index
 
@@ -124,7 +118,7 @@ def uploadInExcel(value):
 
     df = pd.DataFrame(data, columns=['Актив', 'Цена', 'ATR'])
     df.to_excel('котировки.xlsx',sheet_name='Акции', index=False)
-    print('Успех!')
+    print('Акции успешно импортированы! Ждем загрузку индексов...')
 
 def uploadInExcelIndi(url_index):
     webdriver_path = '/path/to/chromedriver'
@@ -194,7 +188,7 @@ url_index = [urlSP500,urlHangSeng,urlIMOEX,urlRTSI,urlGC1,urlGOLDRUBTOM,urlUcloi
 # uploadInExcelIndi(urlZN1)
 
 
-# uploadInExcel(url)
-# create_index_sheet(filename)
-# uploadInExcelIndi(url_index)
+uploadInExcel(url)
+create_index_sheet(filename)
+uploadInExcelIndi(url_index)
 notify_user('Данные успешно импортированы!')

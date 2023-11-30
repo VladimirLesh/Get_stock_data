@@ -4,47 +4,105 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import time
 import re
+import os
+import openpyxl
 
-# Укажите путь к вашему веб-драйверу
-webdriver_path = '/path/to/chromedriver'
+filename = 'котировки.xlsx'
+def checkRow(filename):
+    df = pd.read_excel(filename, sheet_name='Sheet', header=None)
+    last_row = df.iloc[:, 0].last_valid_index() + 1
+    return last_row
 
-# Опции браузера (можно настроить)
-chrome_options = Options()
-chrome_options.add_argument('--headless')  # Запуск браузера в фоновом режиме
-chrome_options.add_argument(f'--webdriver={webdriver_path}')  # Путь к драйверу
+def checkAndSaveFileExcel(filename, namesCompanies, prices, atrs):
+    if os.path.isfile(filename):
+        existing_data = pd.read_excel(filename, index_col=0)
 
-# Создаем объект браузера
-driver = webdriver.Chrome(options=chrome_options)
+        wb = openpyxl.load_workbook(filename)
+        ws = wb.active
+        last_row = checkRow(filename)
 
-# Замените URL на страницу с нужными котировками на TradingView
-url = 'https://ru.tradingview.com/screener/'
-driver.get(url)
+    else:
+        wb = openpyxl.Workbook()
+        ws = wb.active
 
-# Подождем некоторое время для полной загрузки страницы
-time.sleep(1)
+        last_row = 0
+        print('last_row', last_row)
 
-# Получаем исходный код страницы после загрузки JavaScript
-page_source = driver.page_source
+    last_row = int(last_row)  # Преобразуем last_row в число
 
-# Закрываем браузер
-driver.quit()
+    for name, price, atr in zip(namesCompanies, prices, atrs):
+        last_row += 1
+        ws[f'A{last_row}'] = name.text.strip()
+        ws[f'B{last_row}'] = price.text.strip()
+        ws[f'C{last_row}'] = atr.text.strip()
+    wb.save(filename)
 
-# Парсим HTML-код страницы
-soup = BeautifulSoup(page_source, 'html.parser')
+def uploadInExcel(value):
+    webdriver_path = '/path/to/chromedriver'
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')  # Запуск браузера в фоновом режиме
+    chrome_options.add_argument(f'--webdriver={webdriver_path}')  # Путь к драйверу
+    driver = webdriver.Chrome(options=chrome_options)
 
-strings = soup.find_all('tr', class_='tv-data-table__row tv-data-table__stroke tv-screener-table__result-row')
-namesCompanies = soup.find_all('span', class_='tv-screener__description')
-prices = soup.find_all('td', class_='tv-data-table__cell tv-screener-table__cell tv-screener-table__cell--with-marker', attrs={'title': '', 'data-field-key': 'close'})
-atrs = soup.find_all('td', class_='tv-data-table__cell tv-screener-table__cell tv-screener-table__cell--down tv-screener-table__cell--with-marker', attrs={'title': '', 'data-field-key': 'change'})
+    url = value
+    driver.get(url)
+    time.sleep(1)
+    page_source = driver.page_source
+    driver.quit()
 
-# Создаем список данных
-data = []
-# Заполнение списка данными
-for name, price, atr in zip(namesCompanies, prices, atrs):
-    data.append([name.text.strip(), price.text.strip(), atr.text.strip()])
+    soup = BeautifulSoup(page_source, 'html.parser')
 
-# Создаем DataFrame с помощью Pandas
-df = pd.DataFrame(data, columns=['Актив', 'Цена', 'ATR'])
+    namesCompanies = soup.find_all('span', class_='tv-screener__description')
+    prices = soup.find_all('td',
+                           class_='tv-data-table__cell tv-screener-table__cell tv-screener-table__cell--with-marker',
+                           attrs={'title': '', 'data-field-key': 'close'})
+    atrs = soup.find_all('td',
+                         class_='tv-data-table__cell tv-screener-table__cell tv-screener-table__cell--down tv-screener-table__cell--with-marker',
+                         attrs={'title': '', 'data-field-key': 'change'})
 
-# Сохраняем DataFrame в файл Excel
-df.to_excel('котировки.xlsx', index=False)
+    data = []
+    for name, price, atr in zip(namesCompanies, prices, atrs):
+        data.append([name.text.strip(), price.text.strip(), atr.text.strip()])
+
+    df = pd.DataFrame(data, columns=['Актив', 'Цена', 'ATR'])
+    df.to_excel('котировки.xlsx', index=False)
+    print('Успех!')
+
+def uploadInExcelIndi(value):
+    webdriver_path = '/path/to/chromedriver'
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')  # Запуск браузера в фоновом режиме
+    chrome_options.add_argument(f'--webdriver={webdriver_path}')  # Путь к драйверу
+    driver = webdriver.Chrome(options=chrome_options)
+
+    url = value
+    driver.get(url)
+    time.sleep(1)
+    page_source = driver.page_source
+    driver.quit()
+
+    soup = BeautifulSoup(page_source, 'html.parser')
+
+    namesCompanies = soup.find_all('h1', class_='apply-overflow-tooltip title-HFnhSVZy')
+    prices = soup.find_all('span', class_='last-JWoJqCpY js-symbol-last')
+    atrs = soup.find_all('span', class_='js-symbol-change-pt')
+
+    checkAndSaveFileExcel(filename, namesCompanies, prices, atrs)
+    print('Успех!')
+
+
+# url = 'https://ru.tradingview.com/screener/'
+urlSP500 = 'https://ru.tradingview.com/symbols/SPX/?exchange=SP'
+urlHangSeng = 'https://ru.tradingview.com/symbols/TVC-HSI/'
+urlHangSeng = 'https://ru.tradingview.com/symbols/TVC-HSI/'
+urlIMOEX = 'https://ru.tradingview.com/symbols/MOEX-IMOEX/'
+urlRTSI = 'https://ru.tradingview.com/symbols/MOEX-RTSI/'
+urlGOLD = 'https://ru.tradingview.com/symbols/GOLD/?exchange=TVC'
+urlGOLDRUBTOD = 'https://ru.tradingview.com/symbols/MOEX-GLDRUB_TOD/'
+
+uploadInExcelIndi(urlSP500)
+uploadInExcelIndi(urlHangSeng)
+uploadInExcelIndi(urlIMOEX)
+uploadInExcelIndi(urlRTSI)
+uploadInExcelIndi(urlGOLDRUBTOD)
+

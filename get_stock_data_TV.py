@@ -94,15 +94,32 @@ def uploadInExcelIndi(value):
 # url = 'https://ru.tradingview.com/screener/'
 urlSP500 = 'https://ru.tradingview.com/symbols/SPX/?exchange=SP'
 urlHangSeng = 'https://ru.tradingview.com/symbols/TVC-HSI/'
-urlHangSeng = 'https://ru.tradingview.com/symbols/TVC-HSI/'
 urlIMOEX = 'https://ru.tradingview.com/symbols/MOEX-IMOEX/'
 urlRTSI = 'https://ru.tradingview.com/symbols/MOEX-RTSI/'
-urlGOLD = 'https://ru.tradingview.com/symbols/GOLD/?exchange=TVC'
-urlGOLDRUBTOD = 'https://ru.tradingview.com/symbols/MOEX-GLDRUB_TOD/'
+urlGC1 = 'https://ru.tradingview.com/symbols/COMEX-GC1!/'
+urlGOLDRUBTOM = 'https://ru.tradingview.com/symbols/USDRUB_TOM/?exchange=MOEX'
+urlUcloilBrent = 'https://ru.tradingview.com/symbols/UKOIL/?exchange=TVC'
+urlES1 = 'https://ru.tradingview.com/symbols/CME_MINI-ES11!/?contract=ES101Z2023'
+urlNG1 = 'https://ru.tradingview.com/symbols/MOEX-NG1!/'
+urlEURUSD = 'https://ru.tradingview.com/symbols/EURUSD/?exchange=OANDA'
+urlCNHUSD = 'https://ru.tradingview.com/symbols/CNHUSD/?exchange=FX_IDC'
+urlFGBL1 = 'https://ru.tradingview.com/symbols/EUREX-FGBL1!/'
+urlRGBI1 = 'https://ru.tradingview.com/symbols/MOEX-RGBI/'
+urlETHUSD = 'https://ru.tradingview.com/symbols/ETHUSD/?exchange=BINANCE'
+urlBTCUSD = 'https://ru.tradingview.com/symbols/BTCUSD/?exchange=BINANCE'
 
 uploadInExcelIndi(urlSP500)
 uploadInExcelIndi(urlHangSeng)
 uploadInExcelIndi(urlIMOEX)
 uploadInExcelIndi(urlRTSI)
-uploadInExcelIndi(urlGOLDRUBTOD)
-
+uploadInExcelIndi(urlGC1)
+uploadInExcelIndi(urlGOLDRUBTOM)
+uploadInExcelIndi(urlUcloilBrent)
+uploadInExcelIndi(urlES1)
+uploadInExcelIndi(urlNG1)
+uploadInExcelIndi(urlEURUSD)
+uploadInExcelIndi(urlCNHUSD)
+uploadInExcelIndi(urlFGBL1)
+uploadInExcelIndi(urlRGBI1)
+uploadInExcelIndi(urlETHUSD)
+uploadInExcelIndi(urlBTCUSD)

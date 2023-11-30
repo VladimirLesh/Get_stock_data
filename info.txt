@@ -1,12 +1,10 @@
-macOS:
-Создайте ярлык:
-
-Откройте терминал.
-Используйте команду ln -s для создания символической ссылки на ваш скрипт:
-
-ln -s /path/to/your/script.py ~/Desktop/script
-
-Замените /path/to/your/script.py на полный путь к вашему скрипту, и script на желаемое имя ярлыка.
-Установите права на выполнение (если необходимо):
-
-chmod +x /path/to/your/script.py
+Что нужно установить для запуска скриптов на Python:
+Python3
+Далее в терминале (копируем, вставляем по одной строке и нажимаем Enter):
+python -m ensurepip --default-pip
+pip install selenium
+pip install beautifulsoup4
+pip install pandas
+pip install openpyxl
+pip install pandas openpyxl requests schedule
+pip install html5lib

@@ -6,6 +6,7 @@ import schedule
 import time
 import os
 
+
 def get_stock_data():
     url = 'https://finviz.com/screener.ashx'
     response = requests.get(url)

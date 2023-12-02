@@ -8,7 +8,6 @@ import os
 import openpyxl
 import platform
 
-filename = 'котировки.xlsx'
 def notify_user(message):
     system_platform = platform.system()
 
@@ -48,10 +47,11 @@ def check_row(sheet):
     last_row_index = sheet.max_row
     return last_row_index
 
-def create_index_sheet(filename):
+
+def create_index_sheet(filename, sheetname):
     workbook = openpyxl.load_workbook(filename)
-    if 'Индексы' not in workbook.sheetnames:
-        workbook.create_sheet('Индексы')
+    if sheetname not in workbook.sheetnames:
+        workbook.create_sheet(sheetname)
         workbook.save(filename)
 
 def check_and_create_excel_file(filename):
@@ -60,19 +60,19 @@ def check_and_create_excel_file(filename):
         df_empty.to_excel(filename, index=False)
         create_index_sheet(filename)
 
-def check_and_save_file_excel(filename, names_companies, prices, atrs):
+def check_and_save_file_excel(filename, names_companies, prices, atrs, sheetname):
     wb = None
     ws = None
 
     if os.path.isfile(filename):
         wb = openpyxl.load_workbook(filename)
-        if 'Индексы' in wb.sheetnames:
-            ws = wb['Индексы']
+        if sheetname in wb.sheetnames:
+            ws = wb[sheetname]
         else:
-            ws = wb.create_sheet('Индексы')
+            ws = wb.create_sheet(sheetname)
     else:
         wb = openpyxl.Workbook()
-        ws = wb.create_sheet('Индексы')
+        ws = wb.create_sheet(sheetname)
 
     last_row = check_row(ws)
 
@@ -89,7 +89,7 @@ def check_row(sheet):
     last_row_index = sheet.max_row
     return last_row_index
 
-def uploadInExcel(value):
+def uploadInExcel(value, filename,  sheetname):
     webdriver_path = '/path/to/chromedriver'
     chrome_options = Options()
     chrome_options.add_argument('--headless')  # Запуск браузера в фоновом режиме
@@ -117,10 +117,10 @@ def uploadInExcel(value):
         data.append([name.text.strip(), price.text.strip(), atr.text.strip()])
 
     df = pd.DataFrame(data, columns=['Актив', 'Цена', 'ATR'])
-    df.to_excel('котировки.xlsx',sheet_name='Акции', index=False)
+    df.to_excel(filename,sheet_name=sheetname, index=False)
     print('Акции успешно импортированы! Ждем загрузку индексов...')
 
-def uploadInExcelIndi(url_index):
+def uploadInExcelIndi(url_index, sheetname):
     webdriver_path = '/path/to/chromedriver'
     chrome_options = Options()
     chrome_options.add_argument('--headless')  # Запуск браузера в фоновом режиме
@@ -142,9 +142,12 @@ def uploadInExcelIndi(url_index):
     for soup in soup_array:
         namesCompanies = soup.find_all('h1', class_='apply-overflow-tooltip title-HFnhSVZy')
         prices = soup.find_all('span', class_='last-JWoJqCpY js-symbol-last')
-        atrs = soup.find_all(attrs={'title': 'Average True Range %', 'shorttitle': 'ATR%'})
-        check_and_save_file_excel(filename, namesCompanies, prices, atrs)
+        atrs = soup.find_all('span', class_='js-symbol-change-pt')
+        check_and_save_file_excel(filename, namesCompanies, prices, atrs, sheetname)
         print(namesCompanies, 'Успех!')
+
+
+filename = 'копия.xlsx'
 
 url = 'https://ru.tradingview.com/screener/'
 urlSP500 = 'https://ru.tradingview.com/symbols/SPX/?exchange=SP'
@@ -163,14 +166,17 @@ urlRGBI1 = 'https://ru.tradingview.com/symbols/MOEX-RGBI/'
 urlETHUSD = 'https://ru.tradingview.com/symbols/ETHUSD/?exchange=BINANCE'
 urlBTCUSD = 'https://ru.tradingview.com/symbols/BTCUSD/?exchange=BINANCE'
 urlZN1 = 'https://ru.tradingview.com/symbols/CBOT-ZN1!/'
+urlYNDX = 'https://ru.tradingview.com/symbols/MOEX-YNDX/'
+urlOZON = 'https://ru.tradingview.com/symbols/MOEX-OZON/'
 
 url_index = [urlSP500,urlHangSeng,urlIMOEX,urlRTSI,urlGC1,urlGOLDRUBTOM,urlUcloilBrent,
              urlES1,urlNG1,urlEURUSD,urlCNHUSD,urlFGBL1,urlRGBI1,urlETHUSD,urlBTCUSD,urlZN1]
 
-# uploadInExcel(url)
-# create_index_sheet(filename)
-# uploadInExcelIndi(url_index)
-# notify_user('Данные успешно импортированы!')
+urlStocks = [urlYNDX,urlOZON]
 
-test = ['https://ru.tradingview.com/chart/VbVi3NYy/?symbol=MOEX%3ASBER']
-uploadInExcelIndi(test)
+create_index_sheet(filename, 'Акции')
+create_index_sheet(filename, 'Индексы')
+uploadInExcel(url,filename, 'акции')
+uploadInExcelIndi(url_index, 'Индексы')
+uploadInExcelIndi(urlStocks, 'акции')
+notify_user('Данные успешно импортированы!')

@@ -1,3 +1,4 @@
+from openpyxl.reader.excel import load_workbook
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
@@ -19,6 +20,25 @@ def notify_user(message):
         subprocess.run(['osascript', '-e', f'display notification "{message}" with title "Уведомление"'])
     else:
         print(f"Уведомление: {message}")
+
+def save_to_excel(dataframe, filename, sheetname):
+    try:
+        # Пытаемся загрузить существующий файл
+        existing_data = pd.read_excel(filename, sheet_name=sheetname)
+
+        # Добавляем новые данные
+        updated_data = pd.concat([existing_data, dataframe], axis=1)
+
+        # # Записываем обновленные данные в файл
+        # with pd.ExcelWriter(filename, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+        #     updated_data.to_excel(writer, sheet_name=sheetname, index=False)
+    except FileNotFoundError:
+        # Если файл не существует, создаем новый с указанным листом
+        dataframe.to_excel(filename, sheet_name=sheetname, index=False)
+    except ValueError:
+        # Если лист не существует, создаем новый лист и добавляем данные
+        with pd.ExcelWriter(filename, engine='openpyxl', mode='a') as writer:
+            dataframe.to_excel(writer, sheet_name=sheetname, index=False)
 
 def check_and_create_file(file_path):
     if not os.path.isfile(file_path):
@@ -75,7 +95,6 @@ def check_and_save_file_excel(filename, names_companies, prices, atrs, sheetname
         ws = wb.create_sheet(sheetname)
 
     last_row = check_row(ws)
-
     last_row = int(last_row)
 
     for name, price, atr in zip(names_companies, prices, atrs):
@@ -116,8 +135,10 @@ def uploadInExcel(value, filename,  sheetname):
     for name, price, atr in zip(namesCompanies, prices, atrs):
         data.append([name.text.strip(), price.text.strip(), atr.text.strip()])
 
+
     df = pd.DataFrame(data, columns=['Актив', 'Цена', 'ATR'])
-    df.to_excel(filename,sheet_name=sheetname, index=False)
+    save_to_excel(df, filename, sheetname)
+    # df.to_excel(filename,sheet_name=sheetname, index=False)
     print('Акции успешно импортированы! Ждем загрузку индексов...')
 
 def uploadInExcelIndi(url_index, sheetname):
@@ -138,6 +159,7 @@ def uploadInExcelIndi(url_index, sheetname):
 
     driver.quit()
 
+    clear_excel_sheet(filename, sheetname)
 
     for soup in soup_array:
         namesCompanies = soup.find_all('h1', class_='apply-overflow-tooltip title-HFnhSVZy')
@@ -146,8 +168,22 @@ def uploadInExcelIndi(url_index, sheetname):
         check_and_save_file_excel(filename, namesCompanies, prices, atrs, sheetname)
         print(namesCompanies, 'Успех!')
 
+def clear_excel_sheet(filename, sheetname):
+    try:
+        book = openpyxl.load_workbook(filename)
+    except FileNotFoundError:
+        book = openpyxl.Workbook()
 
-filename = 'копия.xlsx'
+        # Выбираем лист или создаем новый
+    sheet = book[sheetname] if sheetname in book.sheetnames else book.create_sheet(sheetname)
+
+    for row in sheet.iter_rows():
+        for cell in row:
+            cell.value = None
+
+    book.save(filename)
+
+filename = 'C:/Users/vladi/OneDrive/Рабочий стол/копия.xlsx'
 
 url = 'https://ru.tradingview.com/screener/'
 urlSP500 = 'https://ru.tradingview.com/symbols/SPX/?exchange=SP'
@@ -174,9 +210,9 @@ url_index = [urlSP500,urlHangSeng,urlIMOEX,urlRTSI,urlGC1,urlGOLDRUBTOM,urlUcloi
 
 urlStocks = [urlYNDX,urlOZON]
 
-create_index_sheet(filename, 'Акции')
-create_index_sheet(filename, 'Индексы')
-uploadInExcel(url,filename, 'акции')
+# create_index_sheet(filename, 'Акции')
+# create_index_sheet(filename, 'Индексы')
+uploadInExcel(url,filename, 'акции скринер')
 uploadInExcelIndi(url_index, 'Индексы')
 uploadInExcelIndi(urlStocks, 'акции')
 notify_user('Данные успешно импортированы!')
